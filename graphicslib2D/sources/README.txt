@@ -1,1 +1,1 @@
-This folder contains all the cpp source files.
+This folder contains all the source files.
