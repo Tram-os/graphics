@@ -1,7 +1,5 @@
-/*This source code copyrighted by Lazy Foo' Productions 2004-2024
-and may not be redistributed without written permission.*/
+#include "shader.h"
 
-//Using SDL, SDL OpenGL, GLEW, standard IO, and strings
 #include <SDL.h>
 #include <glew.h>
 #include <SDL_opengl.h>
@@ -118,123 +116,46 @@ bool initGL()
 	//Success flag
 	bool success = true;
 
-	//Generate program
-	gProgramID = glCreateProgram();
+	Shader ourProgram = Shader("sources/shaders/vertex.vs", "sources/shaders/fragment.fs");
 
-	//Create vertex shader
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-
-	//Get vertex source
-	const GLchar* vertexShaderSource[] =
+	//Get vertex attribute location
+	gVertexPos2DLocation = glGetAttribLocation(ourProgram.ID, "aPos");
+	if (gVertexPos2DLocation == -1)
 	{
-		"#version 140\nin vec2 LVertexPos2D; void main() { gl_Position = vec4( LVertexPos2D.x, LVertexPos2D.y, 0, 1 ); }"
-	};
-
-	//Set vertex source
-	glShaderSource(vertexShader, 1, vertexShaderSource, NULL);
-
-	//Compile vertex source
-	glCompileShader(vertexShader);
-
-	//Check vertex shader for errors
-	GLint vShaderCompiled = GL_FALSE;
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &vShaderCompiled);
-	if (vShaderCompiled != GL_TRUE)
-	{
-		printf("Unable to compile vertex shader %d!\n", vertexShader);
-		printShaderLog(vertexShader);
+		printf("LVertexPos2D is not a valid glsl program variable!\n");
 		success = false;
 	}
 	else
 	{
-		//Attach vertex shader to program
-		glAttachShader(gProgramID, vertexShader);
+		//Initialize clear color
+		glClearColor(0.f, 0.f, 0.f, 1.f);
 
-
-		//Create fragment shader
-		GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-		//Get fragment source
-		const GLchar* fragmentShaderSource[] =
+		//VBO data
+		GLfloat vertexData[] =
 		{
-			"#version 140\nout vec4 LFragment; void main() { LFragment = vec4( 1.0, 1.0, 1.0, 1.0 ); }"
+			-0.5f, -0.5f,
+				0.5f, -0.5f,
+				0.5f,  0.5f,
+			-0.5f,  0.5f
 		};
 
-		//Set fragment source
-		glShaderSource(fragmentShader, 1, fragmentShaderSource, NULL);
+		//IBO data
+		GLuint indexData[] = { 0, 1, 2, 3 };
 
-		//Compile fragment source
-		glCompileShader(fragmentShader);
+		//Create VBO
+		glGenBuffers(1, &gVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, gVBO);
+		glBufferData(GL_ARRAY_BUFFER, 2 * 4 * sizeof(GLfloat), vertexData, GL_STATIC_DRAW);
 
-		//Check fragment shader for errors
-		GLint fShaderCompiled = GL_FALSE;
-		glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &fShaderCompiled);
-		if (fShaderCompiled != GL_TRUE)
-		{
-			printf("Unable to compile fragment shader %d!\n", fragmentShader);
-			printShaderLog(fragmentShader);
-			success = false;
-		}
-		else
-		{
-			//Attach fragment shader to program
-			glAttachShader(gProgramID, fragmentShader);
-
-
-			//Link program
-			glLinkProgram(gProgramID);
-
-			//Check for errors
-			GLint programSuccess = GL_TRUE;
-			glGetProgramiv(gProgramID, GL_LINK_STATUS, &programSuccess);
-			if (programSuccess != GL_TRUE)
-			{
-				printf("Error linking program %d!\n", gProgramID);
-				printProgramLog(gProgramID);
-				success = false;
-			}
-			else
-			{
-				//Get vertex attribute location
-				gVertexPos2DLocation = glGetAttribLocation(gProgramID, "LVertexPos2D");
-				if (gVertexPos2DLocation == -1)
-				{
-					printf("LVertexPos2D is not a valid glsl program variable!\n");
-					success = false;
-				}
-				else
-				{
-					//Initialize clear color
-					glClearColor(0.f, 0.f, 0.f, 1.f);
-
-					//VBO data
-					GLfloat vertexData[] =
-					{
-						-0.5f, -0.5f,
-						 0.5f, -0.5f,
-						 0.5f,  0.5f,
-						-0.5f,  0.5f
-					};
-
-					//IBO data
-					GLuint indexData[] = { 0, 1, 2, 3 };
-
-					//Create VBO
-					glGenBuffers(1, &gVBO);
-					glBindBuffer(GL_ARRAY_BUFFER, gVBO);
-					glBufferData(GL_ARRAY_BUFFER, 2 * 4 * sizeof(GLfloat), vertexData, GL_STATIC_DRAW);
-
-					//Create IBO
-					glGenBuffers(1, &gIBO);
-					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIBO);
-					glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * sizeof(GLuint), indexData, GL_STATIC_DRAW);
-				}
-			}
-		}
+		//Create IBO
+		glGenBuffers(1, &gIBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * sizeof(GLuint), indexData, GL_STATIC_DRAW);
 	}
-
 	return success;
+
 }
+
 
 void handleKeys(unsigned char key, int x, int y)
 {

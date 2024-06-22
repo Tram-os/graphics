@@ -1,13 +1,15 @@
 #include "shader.h"
 
-#include <string>
+#include <SDL.h>
+#include <glew.h>
+#include <SDL_opengl.h>
+#include <gl\glu.h>
 #include <stdio.h>
+#include <string>
 #include <fstream>
-#include <sstream>
-#include <glad.h>
-#include <GLFW/glfw3.h>
 #include <filesystem>
 #include <iostream>
+#include <sstream>
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
