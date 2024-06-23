@@ -1,5 +1,6 @@
 #include "shapes.h"
 #include "shader.h"
+#include "vertexbuffer.h""
 
 #include <glew.h>
 #include <SDL_opengl.h>
@@ -33,15 +34,13 @@ void Shapes::drawRect(const Point2D& min, const Point2D& max, const ColorRGBA& c
 	// Create and set all the buffer objects
 	GLuint VAO, VBO, EBO;
 	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
 
 	// bind the vertex array first
 	glBindVertexArray(VAO);
 
 	// the buffer other buffers and configure attributes
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	VertexBuffer vertexBuffer = VertexBuffer(vertices, sizeof(vertices));
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
