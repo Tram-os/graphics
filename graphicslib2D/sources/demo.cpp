@@ -1,4 +1,5 @@
 #include "shader.h"
+#include "shapes.h"
 
 #include <SDL.h>
 #include <glew.h>
@@ -40,7 +41,7 @@ bool gRenderQuad = true;
 
 //Graphics program
 GLuint gProgramID = 0;
-GLint gVertexPos2DLocation = -1;
+GLint location = -1;
 GLuint gVBO = 0;
 GLuint gIBO = 0;
 
@@ -115,8 +116,8 @@ bool initGL()
 	Shader ourProgram = Shader("sources/shaders/vertex.vs", "sources/shaders/fragment.fs");
 
 	//Get vertex attribute location
-	gVertexPos2DLocation = glGetAttribLocation(ourProgram.ID, "aPos");
-	if (gVertexPos2DLocation == -1)
+	location = glGetAttribLocation(ourProgram.ID, "aPos");
+	if (location == -1)
 	{
 		printf("LVertexPos2D is not a valid glsl program variable!\n");
 		success = false;
@@ -130,8 +131,8 @@ bool initGL()
 		GLfloat vertexData[] =
 		{
 			-0.5f, -0.5f,
-				0.5f, -0.5f,
-				0.5f,  0.5f,
+			 0.5f, -0.5f,
+			 0.5f,  0.5f,
 			-0.5f,  0.5f
 		};
 
@@ -172,29 +173,31 @@ void render()
 	//Clear color buffer
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	//Render quad
-	if (gRenderQuad)
-	{
-		//Bind program
-		glUseProgram(gProgramID);
+	
 
-		//Enable vertex position
-		glEnableVertexAttribArray(gVertexPos2DLocation);
+	////Render quad
+	//if (gRenderQuad)
+	//{
+	//	//Bind program
+	//	glUseProgram(gProgramID);
 
-		//Set vertex data
-		glBindBuffer(GL_ARRAY_BUFFER, gVBO);
-		glVertexAttribPointer(gVertexPos2DLocation, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), NULL);
+	//	//Enable vertex position
+	//	glEnableVertexAttribArray(location);
 
-		//Set index data and render
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIBO);
-		glDrawElements(GL_TRIANGLE_FAN, 4, GL_UNSIGNED_INT, NULL);
+	//	//Set vertex data
+	//	glBindBuffer(GL_ARRAY_BUFFER, gVBO);
+	//	glVertexAttribPointer(location, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), NULL);
 
-		//Disable vertex position
-		glDisableVertexAttribArray(gVertexPos2DLocation);
+	//	//Set index data and render
+	//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIBO);
+	//	glDrawElements(GL_TRIANGLE_FAN, 4, GL_UNSIGNED_INT, NULL);
 
-		//Unbind program
-		glUseProgram(NULL);
-	}
+	//	//Disable vertex position
+	//	glDisableVertexAttribArray(location);
+
+	//	//Unbind program
+	//	glUseProgram(NULL);
+	//}
 }
 
 void close()
@@ -228,6 +231,9 @@ int main(int argc, char* args[])
 		//Enable text input
 		SDL_StartTextInput();
 
+		// Create shapes program
+		Shapes pen = Shapes();
+
 		//While application is running
 		while (!quit)
 		{
@@ -249,7 +255,10 @@ int main(int argc, char* args[])
 			}
 
 			//Render quad
-			render();
+			glClear(GL_COLOR_BUFFER_BIT);
+
+			pen.drawRect(Point2D(-0.5, -0.5), Point2D(0.5, 0.5), ColorRGBA(1, 1, 1, 1));
+			pen.fillRect(Point2D(0.65, 0.65), Point2D(0.85, 0.85), ColorRGBA(1, 1, 1, 1));
 
 			//Update screen
 			SDL_GL_SwapWindow(gWindow);
