@@ -59,10 +59,10 @@ void Shapes::fillRect(const Point2D& min, const Point2D& max, const ColorRGBA& c
 {
 	// The four vertices of the rectangle
 	float vertices[] = {
-		min.x, min.y, 0,
-		min.x, max.y, 0,
-		max.x, max.y, 0,
-		max.x, min.y, 0
+		min.x, min.y,
+		min.x, max.y,
+		max.x, max.y,
+		max.x, min.y
 	};
 	unsigned int indices[] = {
 		0, 1, 2, // top left triangle
@@ -71,27 +71,20 @@ void Shapes::fillRect(const Point2D& min, const Point2D& max, const ColorRGBA& c
 
 	glUseProgram(ID);
 
-	// Create and set all the buffer objects
-	GLuint VAO;
-	glGenVertexArrays(1, &VAO);
+	VertexArray va = VertexArray();
 
-	// bind the vertex array first
-	glBindVertexArray(VAO);
-
-	// set buffers
 	VertexBuffer vb = VertexBuffer(vertices, sizeof(vertices));
-	IndexBuffer ib = IndexBuffer(indices, 6);
+	
+	VertexBufferLayout layout;
+	layout.Push<float>(2);
+	va.AddBuffer(vb, layout);
 
-	glVertexAttribPointer(posLocation, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(posLocation);
+	IndexBuffer ib = IndexBuffer(indices, 6);
 
 	glUniform4f(colorLocation, color.r, color.g, color.b, color.a);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
 }
 
