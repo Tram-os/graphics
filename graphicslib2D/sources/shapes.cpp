@@ -1,5 +1,6 @@
 #include "shapes.h"
 #include "shader.h"
+#include "vertexarray.h"
 #include "vertexbuffer.h"
 #include "indexbuffer.h"
 
@@ -32,19 +33,18 @@ void Shapes::drawRect(const Point2D& min, const Point2D& max, const ColorRGBA& c
 
 	glUseProgram(ID);
 
-	// Create and set all the buffer objects
-	GLuint VAO;
-	glGenVertexArrays(1, &VAO);
+	// Create vertex array
+	VertexArray va = VertexArray();
 
-	// bind the vertex array first
-	glBindVertexArray(VAO);
+	// Create vertex buffer
+	VertexBuffer vb = VertexBuffer(vertices, sizeof(vertices));
 
-	// Create and bind buffers
-	VertexBuffer vertexBuffer = VertexBuffer(vertices, sizeof(vertices));
+	VertexBufferLayout layout;
+	layout.Push<float>(3);
+	
+	va.AddBuffer(vb, layout);
+
 	IndexBuffer indexBuffer = IndexBuffer(indices, 4);
-
-	glVertexAttribPointer(posLocation, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(posLocation);
 
 	glUniform4f(colorLocation, color.r, color.g, color.b, color.a);
 
