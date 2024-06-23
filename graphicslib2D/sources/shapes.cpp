@@ -1,6 +1,7 @@
 #include "shapes.h"
 #include "shader.h"
-#include "vertexbuffer.h""
+#include "vertexbuffer.h"
+#include "indexbuffer.h"
 
 #include <glew.h>
 #include <SDL_opengl.h>
@@ -32,18 +33,15 @@ void Shapes::drawRect(const Point2D& min, const Point2D& max, const ColorRGBA& c
 	glUseProgram(ID);
 
 	// Create and set all the buffer objects
-	GLuint VAO, VBO, EBO;
+	GLuint VAO;
 	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &EBO);
 
 	// bind the vertex array first
 	glBindVertexArray(VAO);
 
-	// the buffer other buffers and configure attributes
+	// Create and bind buffers
 	VertexBuffer vertexBuffer = VertexBuffer(vertices, sizeof(vertices));
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	IndexBuffer indexBuffer = IndexBuffer(indices, 4);
 
 	glVertexAttribPointer(posLocation, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(posLocation);
@@ -54,7 +52,6 @@ void Shapes::drawRect(const Point2D& min, const Point2D& max, const ColorRGBA& c
 
 	glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, 0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }
 
@@ -75,26 +72,19 @@ void Shapes::fillRect(const Point2D& min, const Point2D& max, const ColorRGBA& c
 	glUseProgram(ID);
 
 	// Create and set all the buffer objects
-	GLuint VAO, VBO, EBO;
+	GLuint VAO;
 	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
 
 	// bind the vertex array first
 	glBindVertexArray(VAO);
 
-	// the buffer other buffers and configure attributes
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	// set buffers
+	VertexBuffer vb = VertexBuffer(vertices, sizeof(vertices));
+	IndexBuffer ib = IndexBuffer(indices, 6);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	glVertexAttribPointer(posLocation, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(posLocation);
 
-	int location = glGetAttribLocation(ID, "aPos");
-	glVertexAttribPointer(location, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(location);
-
-	int colorLocation = glGetUniformLocation(ID, "inputColor");
 	glUniform4f(colorLocation, color.r, color.g, color.b, color.a);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

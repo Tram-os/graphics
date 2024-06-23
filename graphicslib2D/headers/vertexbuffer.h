@@ -27,12 +27,12 @@ public:
 	/**
 	 * Binds the vertex buffer
 	 */
-	void Bind();
+	void Bind() const;
 
 	/**
 	 * Unbinds the vertex buffer
 	 */
-	void Unbind();
+	void Unbind() const;
 };
 
 #endif
