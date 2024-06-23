@@ -9,9 +9,13 @@ Shapes::Shapes()
 {
 	Shader program = Shader("sources/shaders/vertex.vs", "sources/shaders/fragment.fs");
 	ID = program.ID;
+	glUseProgram(ID);
+	posLocation = glGetAttribLocation(ID, "aPos");
+	colorLocation = glGetUniformLocation(ID, "inputColor");
+	glUniform4f(colorLocation, 1, 1, 1, 1); // set default color to white
 }
 
-void Shapes::drawRect(const Point2D& min, const Point2D& max, const ColorRGBA& color)
+void Shapes::drawRect(const Point2D& min, const Point2D& max, const ColorRGBA& color) const
 {
 	// The four vertices of the rectangle
 	float vertices[] = {
@@ -42,9 +46,10 @@ void Shapes::drawRect(const Point2D& min, const Point2D& max, const ColorRGBA& c
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	int location = glGetAttribLocation(ID, "aPos");
-	glVertexAttribPointer(location, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(location);
+	glVertexAttribPointer(posLocation, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(posLocation);
+
+	glUniform4f(colorLocation, color.r, color.g, color.b, color.a);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -54,7 +59,7 @@ void Shapes::drawRect(const Point2D& min, const Point2D& max, const ColorRGBA& c
 	glBindVertexArray(0);
 }
 
-void Shapes::fillRect(const Point2D& min, const Point2D& max, const ColorRGBA& color)
+void Shapes::fillRect(const Point2D& min, const Point2D& max, const ColorRGBA& color) const
 {
 	// The four vertices of the rectangle
 	float vertices[] = {
@@ -89,6 +94,9 @@ void Shapes::fillRect(const Point2D& min, const Point2D& max, const ColorRGBA& c
 	int location = glGetAttribLocation(ID, "aPos");
 	glVertexAttribPointer(location, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(location);
+
+	int colorLocation = glGetUniformLocation(ID, "inputColor");
+	glUniform4f(colorLocation, color.r, color.g, color.b, color.a);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 

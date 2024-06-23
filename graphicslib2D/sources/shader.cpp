@@ -24,11 +24,6 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     try
     {
         // open files
-        // Print the paths for debugging
-        std::cout << "The vertex file is: " << vertexPath << std::endl;
-        std::cout << "The fragment file is: " << fragmentPath << std::endl;
-        std::cout << "Current path is " << std::filesystem::current_path() << std::endl;
-
         vShaderFile.open(vertexPath);
         fShaderFile.open(fragmentPath);
         // Check if files are open

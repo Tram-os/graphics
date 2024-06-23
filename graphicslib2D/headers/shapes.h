@@ -11,6 +11,8 @@ class Shapes
 public:
 
     unsigned int ID; // The shapes programs id
+    unsigned int posLocation; // The locationo of the pos input into the vertex shader
+    unsigned int colorLocation; // The location of the inputColor uniform
 
     /**
      * Creates a shapes program object that will be used to render shapes on screen.
@@ -28,7 +30,7 @@ public:
      * 
      * @return none
      */
-    void drawRect(const Point2D &min, const Point2D &max, const ColorRGBA &color);
+    void drawRect(const Point2D &min, const Point2D &max, const ColorRGBA &color) const;
 
     /**
      * Draws and fills a rectangle on screen given the min and max points, along with the color.
@@ -39,7 +41,7 @@ public:
      *
      * @return none
      */
-    void fillRect(const Point2D& min, const Point2D& max, const ColorRGBA& color);
+    void fillRect(const Point2D& min, const Point2D& max, const ColorRGBA& color) const;
 };
 
 

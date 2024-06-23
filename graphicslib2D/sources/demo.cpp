@@ -15,20 +15,20 @@ const int SCREEN_HEIGHT = 480;
 //Starts up SDL, creates window, and initializes OpenGL
 bool init();
 
-//Initializes rendering program and clear color
-bool initGL();
-
 //Input handler
 void handleKeys(unsigned char key, int x, int y);
 
 //Per frame update
 void update();
 
-//Renders quad to the screen
-void render();
-
 //Frees media and shuts down SDL
 void close();
+
+// Handles window resizing
+void resize();
+
+// Handles the rendering of shapes
+void renderShapes(const Shapes &pen);
 
 //The window we'll be rendering to
 SDL_Window* gWindow = NULL;
@@ -36,14 +36,6 @@ SDL_Window* gWindow = NULL;
 //OpenGL context
 SDL_GLContext gContext;
 
-//Render flag
-bool gRenderQuad = true;
-
-//Graphics program
-GLuint gProgramID = 0;
-GLint location = -1;
-GLuint gVBO = 0;
-GLuint gIBO = 0;
 
 bool init()
 {
@@ -64,7 +56,7 @@ bool init()
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
 		//Create window
-		gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+		gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 		if (gWindow == NULL)
 		{
 			printf("Window could not be created! SDL Error: %s\n", SDL_GetError());
@@ -94,13 +86,6 @@ bool init()
 				{
 					printf("Warning: Unable to set VSync! SDL Error: %s\n", SDL_GetError());
 				}
-
-				//Initialize OpenGL
-				if (!initGL())
-				{
-					printf("Unable to initialize OpenGL!\n");
-					success = false;
-				}
 			}
 		}
 	}
@@ -108,59 +93,14 @@ bool init()
 	return success;
 }
 
-bool initGL()
+void renderShapes(const Shapes &pen)
 {
-	//Success flag
-	bool success = true;
+	glClear(GL_COLOR_BUFFER_BIT);
 
-	Shader ourProgram = Shader("sources/shaders/vertex.vs", "sources/shaders/fragment.fs");
+	ColorRGBA green = ColorRGBA(0, 1, 0, 0.5);
 
-	//Get vertex attribute location
-	location = glGetAttribLocation(ourProgram.ID, "aPos");
-	if (location == -1)
-	{
-		printf("LVertexPos2D is not a valid glsl program variable!\n");
-		success = false;
-	}
-	else
-	{
-		//Initialize clear color
-		glClearColor(0.f, 0.f, 0.f, 1.f);
-
-		//VBO data
-		GLfloat vertexData[] =
-		{
-			-0.5f, -0.5f,
-			 0.5f, -0.5f,
-			 0.5f,  0.5f,
-			-0.5f,  0.5f
-		};
-
-		//IBO data
-		GLuint indexData[] = { 0, 1, 2, 3 };
-
-		//Create VBO
-		glGenBuffers(1, &gVBO);
-		glBindBuffer(GL_ARRAY_BUFFER, gVBO);
-		glBufferData(GL_ARRAY_BUFFER, 2 * 4 * sizeof(GLfloat), vertexData, GL_STATIC_DRAW);
-
-		//Create IBO
-		glGenBuffers(1, &gIBO);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * sizeof(GLuint), indexData, GL_STATIC_DRAW);
-	}
-	return success;
-
-}
-
-
-void handleKeys(unsigned char key, int x, int y)
-{
-	//Toggle quad
-	if (key == 'q')
-	{
-		gRenderQuad = !gRenderQuad;
-	}
+	pen.drawRect(Point2D(-0.5, -0.5), Point2D(0.5, 0.5), ColorRGBA(1, 1, 1, 1));
+	pen.fillRect(Point2D(0.4, 0.4), Point2D(0.85, 0.85), green);
 }
 
 void update()
@@ -168,49 +108,25 @@ void update()
 	//No per frame update needed
 }
 
-void render()
-{
-	//Clear color buffer
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	
-
-	////Render quad
-	//if (gRenderQuad)
-	//{
-	//	//Bind program
-	//	glUseProgram(gProgramID);
-
-	//	//Enable vertex position
-	//	glEnableVertexAttribArray(location);
-
-	//	//Set vertex data
-	//	glBindBuffer(GL_ARRAY_BUFFER, gVBO);
-	//	glVertexAttribPointer(location, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), NULL);
-
-	//	//Set index data and render
-	//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIBO);
-	//	glDrawElements(GL_TRIANGLE_FAN, 4, GL_UNSIGNED_INT, NULL);
-
-	//	//Disable vertex position
-	//	glDisableVertexAttribArray(location);
-
-	//	//Unbind program
-	//	glUseProgram(NULL);
-	//}
-}
-
 void close()
 {
-	//Deallocate program
-	glDeleteProgram(gProgramID);
-
 	//Destroy window	
 	SDL_DestroyWindow(gWindow);
 	gWindow = NULL;
 
 	//Quit SDL subsystems
 	SDL_Quit();
+}
+
+void resize()
+{
+	int w = 1;
+	int h = 1;
+	SDL_GetWindowSize(gWindow, &w, &h);
+	SDL_SetWindowSize(gWindow, w, h);
+	glViewport(0, 0, w, h);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 }
 
 int main(int argc, char* args[])
@@ -231,6 +147,12 @@ int main(int argc, char* args[])
 		//Enable text input
 		SDL_StartTextInput();
 
+		//Initialize clear color
+		glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+		glClearColor(0.f, 0.f, 0.f, 1.f);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 		// Create shapes program
 		Shapes pen = Shapes();
 
@@ -240,25 +162,25 @@ int main(int argc, char* args[])
 			//Handle events on queue
 			while (SDL_PollEvent(&e) != 0)
 			{
-				//User requests quit
-				if (e.type == SDL_QUIT)
-				{
+				switch (e.type) {
+				case SDL_QUIT:
 					quit = true;
-				}
-				//Handle keypress with current mouse position
-				else if (e.type == SDL_TEXTINPUT)
-				{
-					int x = 0, y = 0;
-					SDL_GetMouseState(&x, &y);
-					handleKeys(e.text.text[0], x, y);
+					break;
+				case SDL_WINDOWEVENT:
+					resize();
+					break;
+				case SDL_KEYDOWN:
+					switch (e.key.keysym.sym) {
+					case SDLK_ESCAPE:
+						quit = true;
+						break;
+					default:
+						break;
+					}
 				}
 			}
 
-			//Render quad
-			glClear(GL_COLOR_BUFFER_BIT);
-
-			pen.drawRect(Point2D(-0.5, -0.5), Point2D(0.5, 0.5), ColorRGBA(1, 1, 1, 1));
-			pen.fillRect(Point2D(0.65, 0.65), Point2D(0.85, 0.85), ColorRGBA(1, 1, 1, 1));
+			renderShapes(pen);
 
 			//Update screen
 			SDL_GL_SwapWindow(gWindow);
