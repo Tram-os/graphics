@@ -12,6 +12,7 @@
 #include <sstream>
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath)
+    : m_RendererID(0), m_VertexPath(std::string(vertexPath)), m_FragmentPath(std::string(fragmentPath))
 {
     // 1. retrieve the vertex/fragment source code from filePath
     std::string vertexCode;
@@ -66,20 +67,36 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     glCompileShader(fragment);
     checkCompileErrors(fragment, "FRAGMENT");
     // shader Program
-    ID = glCreateProgram();
-    glAttachShader(ID, vertex);
-    glAttachShader(ID, fragment);
-    glLinkProgram(ID);
-    checkCompileErrors(ID, "PROGRAM");
+    m_RendererID = glCreateProgram();
+    glAttachShader(m_RendererID, vertex);
+    glAttachShader(m_RendererID, fragment);
+    glLinkProgram(m_RendererID);
+    checkCompileErrors(m_RendererID, "PROGRAM");
     // delete the shaders as they're linked into our program now and no longer necessary
     glDeleteShader(vertex);
     glDeleteShader(fragment);
 }
 
-void Shader::use()
+Shader::~Shader()
 {
-    glUseProgram(ID);
+    glDeleteProgram(m_RendererID);
 }
+
+void Shader::Bind() const
+{
+    glUseProgram(m_RendererID);
+}
+
+void Shader::Unbind() const
+{
+    glUseProgram(0);
+}
+
+void Shader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3)
+{
+    glUniform4f(GetUnfiformLocation(name), v0, v1, v2, v3);
+}
+
 
 void Shader::checkCompileErrors(unsigned int shader, std::string type)
 {
@@ -103,4 +120,19 @@ void Shader::checkCompileErrors(unsigned int shader, std::string type)
             printf("ERROR::SHADER::PROGRAM_LINKING_ERROR of type: %s\n", infoLog);
         }
     }
+}
+
+unsigned int Shader::GetUnfiformLocation(const std::string& name)
+{
+    if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
+    {
+        return m_UniformLocationCache[name];
+    }
+    int location = glGetUniformLocation(m_RendererID, name.c_str());
+    m_UniformLocationCache[name] = location;
+    if (location == -1)
+    {
+        printf("Uniform %s Does not exist!\n", name.c_str());
+    }
+    return location;
 }

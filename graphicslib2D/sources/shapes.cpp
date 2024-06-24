@@ -9,16 +9,13 @@
 #include <gl\glu.h>
 
 Shapes::Shapes()
+	: m_Shader(Shader("sources/shaders/vertex.vs", "sources/shaders/fragment.fs"))
 {
-	Shader program = Shader("sources/shaders/vertex.vs", "sources/shaders/fragment.fs");
-	ID = program.ID;
-	glUseProgram(ID);
-	posLocation = glGetAttribLocation(ID, "aPos");
-	colorLocation = glGetUniformLocation(ID, "inputColor");
-	glUniform4f(colorLocation, 1, 1, 1, 1); // set default color to white
+	m_Shader.Bind();
+	m_Shader.SetUniform4f("inputColor", 1, 1, 1, 1);
 }
 
-void Shapes::drawRect(const Point2D& min, const Point2D& max, const ColorRGBA& color) const
+void Shapes::drawRect(const Point2D& min, const Point2D& max, const ColorRGBA& color)
 {
 	// The four vertices of the rectangle
 	float vertices[] = {
@@ -31,7 +28,7 @@ void Shapes::drawRect(const Point2D& min, const Point2D& max, const ColorRGBA& c
 		0, 1, 2, 3
 	};
 
-	glUseProgram(ID);
+	m_Shader.Bind();
 
 	// Create vertex array
 	VertexArray va = VertexArray();
@@ -46,7 +43,8 @@ void Shapes::drawRect(const Point2D& min, const Point2D& max, const ColorRGBA& c
 
 	IndexBuffer indexBuffer = IndexBuffer(indices, 4);
 
-	glUniform4f(colorLocation, color.r, color.g, color.b, color.a);
+	m_Shader.SetUniform4f("inputColor", color.r, color.g, color.b, color.a);
+
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -55,7 +53,7 @@ void Shapes::drawRect(const Point2D& min, const Point2D& max, const ColorRGBA& c
 	glBindVertexArray(0);
 }
 
-void Shapes::fillRect(const Point2D& min, const Point2D& max, const ColorRGBA& color) const
+void Shapes::fillRect(const Point2D& min, const Point2D& max, const ColorRGBA& color)
 {
 	// The four vertices of the rectangle
 	float vertices[] = {
@@ -69,7 +67,7 @@ void Shapes::fillRect(const Point2D& min, const Point2D& max, const ColorRGBA& c
 		0, 3, 2  // bottom right triangle
 	};
 
-	glUseProgram(ID);
+	m_Shader.Bind();
 
 	VertexArray va = VertexArray();
 
@@ -81,7 +79,7 @@ void Shapes::fillRect(const Point2D& min, const Point2D& max, const ColorRGBA& c
 
 	IndexBuffer ib = IndexBuffer(indices, 6);
 
-	glUniform4f(colorLocation, color.r, color.g, color.b, color.a);
+	m_Shader.SetUniform4f("inputColor", color.r, color.g, color.b, color.a);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 

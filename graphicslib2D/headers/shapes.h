@@ -2,17 +2,17 @@
 #define SHAPES_H
 
 #include "utility.h"
+#include "shader.h"
 
 /**
  * Implementation of shapes object that will render basic shapes on screen using the shapes shader program. 
  */
 class Shapes
 {
-public:
+private:
+    Shader m_Shader; // The shader program used
 
-    unsigned int ID; // The shapes programs id
-    unsigned int posLocation; // The locationo of the pos input into the vertex shader
-    unsigned int colorLocation; // The location of the inputColor uniform
+public:
 
     /**
      * Creates a shapes program object that will be used to render shapes on screen.
@@ -30,7 +30,7 @@ public:
      * 
      * @return none
      */
-    void drawRect(const Point2D &min, const Point2D &max, const ColorRGBA &color) const;
+    void drawRect(const Point2D &min, const Point2D &max, const ColorRGBA &color);
 
     /**
      * Draws and fills a rectangle on screen given the min and max points, along with the color.
@@ -41,7 +41,7 @@ public:
      *
      * @return none
      */
-    void fillRect(const Point2D& min, const Point2D& max, const ColorRGBA& color) const;
+    void fillRect(const Point2D& min, const Point2D& max, const ColorRGBA& color);
 };
 
 

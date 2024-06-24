@@ -29,7 +29,7 @@ void close();
 void resize();
 
 // Handles the rendering of shapes
-void renderShapes(const Shapes &pen);
+void renderShapes(Shapes *pen);
 
 //The window we'll be rendering to
 SDL_Window* gWindow = NULL;
@@ -94,14 +94,14 @@ bool init()
 	return success;
 }
 
-void renderShapes(const Shapes &pen)
+void renderShapes(Shapes *pen)
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	ColorRGBA green = ColorRGBA(0, 1, 0, 0.5);
 
-	pen.drawRect(Point2D(-0.5, -0.5), Point2D(0.5, 0.5), ColorRGBA(1, 1, 1, 1));
-	pen.fillRect(Point2D(0.4, 0.4), Point2D(0.85, 0.85), green);
+	pen->drawRect(Point2D(-0.5, -0.5), Point2D(0.5, 0.5), ColorRGBA(1, 1, 1, 1));
+	pen->fillRect(Point2D(0.4, 0.4), Point2D(0.85, 0.85), green);
 }
 
 void update()
@@ -181,7 +181,7 @@ int main(int argc, char* args[])
 				}
 			}
 
-			renderShapes(pen);
+			renderShapes(&pen);
 
 			//Update screen
 			SDL_GL_SwapWindow(gWindow);
