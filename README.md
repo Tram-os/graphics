@@ -1,7 +1,7 @@
 # graphics
 This repository contains graphics libraries for use in game development
 
-This Library Is VERY annoying to set up - but it can be done. To set up in a visual studio environment that
+This Library Is VERY annoying to set up - but it can be done. To set up in a visual studio environment that 
 allows you to compile and run code, these are the other libaries I downloaded and set up within visual studio:
 
 glew-2.1.0-win32 - Can be found at https://glew.sourceforge.net/
