@@ -12,5 +12,5 @@ GLAD - to get glad use https://glad.dav1d.de/ and generate the files. glad.c wil
 **NOTE** I built with Windows x64 using gcc on Visual Studio 2019 Community Edition\
 \
 Great resources:\
-Lazy Foo's Tutorials at https://lazyfoo.net/tutorials/SDL/ and Learn OpenGL at https://learnopengl.com/\
+Lazy Foo's Tutorials at https://lazyfoo.net/tutorials/SDL/ and Learn OpenGL at https://learnopengl.com/ \
 
