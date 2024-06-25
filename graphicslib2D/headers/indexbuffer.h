@@ -36,7 +36,7 @@ public:
 	void Unbind() const;
 
 	/**
-	 *
+	 * Returns the number of indices in the index buffer
 	 */
 	inline unsigned int GetCount() const { return m_Count; }
 };

@@ -9,12 +9,16 @@
  */
 struct VertexBufferElement
 {
-	unsigned int type;
-	unsigned int count;
-	unsigned char normalized;
+	unsigned int type; // The type of vertice
+	unsigned int count; // The number of elements in the vertice
+	unsigned char normalized; // 0 for not normalized, 1 for normalized
 
 	/**
-	 * returns the size of provided gl type
+	 * Gets the number of bytes int he opengl type
+	 * 
+	 * @param[in] type The opengl type
+	 * 
+	 * @return 0 or the number of bytes in the opengl type
 	 */
 	static unsigned int GetSizeOfType(unsigned int type)
 	{
@@ -42,11 +46,12 @@ public:
 		: m_Stride(0) {}
 
 	/**
-	 * Define the number of elements each vertex of the buffer, along with the type of element.
+	 * Adds the VertexBufferElement to the m_Elements vector. Define the number of elements each vertex of the buffer, along with the type of element.
 	 * For example, if each vertice being added has an x, y, and z and are all floats, use Push<float>(3)
 	 * 
 	 * @param[in] The number of elements per vertice in the layout.
 	 * 
+	 * @return none 
 	 */
 	template<typename T>
 	void Push(unsigned int count)

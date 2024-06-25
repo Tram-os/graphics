@@ -1,5 +1,5 @@
+#include "renderer.h"
 #include "shader.h"
-#include "shapes.h"
 #include "vertexarray.h"
 
 #include <SDL.h>
@@ -16,20 +16,11 @@ const int SCREEN_HEIGHT = 480;
 //Starts up SDL, creates window, and initializes OpenGL
 bool init();
 
-//Input handler
-void handleKeys(unsigned char key, int x, int y);
-
-//Per frame update
-void update();
-
 //Frees media and shuts down SDL
 void close();
 
 // Handles window resizing
 void resize();
-
-// Handles the rendering of shapes
-void renderShapes(Shapes *pen);
 
 //The window we'll be rendering to
 SDL_Window* gWindow = NULL;
@@ -37,6 +28,104 @@ SDL_Window* gWindow = NULL;
 //OpenGL context
 SDL_GLContext gContext;
 
+
+int main(int argc, char* args[])
+{
+	//Start up SDL and create window
+	if (!init())
+	{
+		printf("Failed to initialize!\n");
+	}
+	else
+	{
+		//Main loop flag
+		bool quit = false;
+
+		//Event handler
+		SDL_Event e;
+
+		//Enable text input
+		SDL_StartTextInput();
+
+		//Initialize clear color
+		glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+		glClearColor(0.f, 0.f, 0.f, 1.f);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		// Create GL stuff:
+		// The four vertices of the rectangle
+		float vertices[] = {
+			-0.5, -0.5,
+			-0.5,  0.5,
+			 0.5,  0.5,
+			 0.5, -0.5
+		};
+		unsigned int indices[] = {
+			0, 1, 2, // top left triangle
+			0, 3, 2  // bottom right triangle
+		};
+
+		Shader shader = Shader("sources/shaders/vertex.vs", "sources/shaders/fragment.fs");
+
+		VertexArray va = VertexArray();
+		VertexBuffer vb = VertexBuffer(vertices, sizeof(vertices));
+
+		// Define vertex buffer layout
+		VertexBufferLayout layout;
+		layout.Push<float>(2);
+
+		IndexBuffer ib = IndexBuffer(indices, 6);
+		va.AddBuffer(vb, layout);
+
+		va.Unbind();
+		vb.Unbind();
+		ib.Unbind();
+		shader.Unbind();
+
+		Renderer renderer;
+
+		//While application is running
+		while (!quit)
+		{
+			//Handle events on queue
+			while (SDL_PollEvent(&e) != 0)
+			{
+				switch (e.type) {
+				case SDL_QUIT:
+					quit = true;
+					break;
+				case SDL_WINDOWEVENT:
+					resize();
+					break;
+				case SDL_KEYDOWN:
+					switch (e.key.keysym.sym) {
+					case SDLK_ESCAPE:
+						quit = true;
+						break;
+					default:
+						break;
+					}
+				}
+			}
+			shader.Bind();
+			shader.SetUniform4f("inputColor", 0.5, 0.5, 0.5, 1);
+			renderer.Clear();
+			renderer.Draw(va, ib, shader);
+
+			//Update screen
+			SDL_GL_SwapWindow(gWindow);
+		}
+
+		//Disable text input
+		SDL_StopTextInput();
+	}
+
+	//Free resources and close SDL
+	close();
+
+	return 0;
+}
 
 bool init()
 {
@@ -94,21 +183,6 @@ bool init()
 	return success;
 }
 
-void renderShapes(Shapes *pen)
-{
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	ColorRGBA green = ColorRGBA(0, 1, 0, 0.5);
-
-	pen->drawRect(Point2D(-0.5, -0.5), Point2D(0.5, 0.5), ColorRGBA(1, 1, 1, 1));
-	pen->fillRect(Point2D(0.4, 0.4), Point2D(0.85, 0.85), green);
-}
-
-void update()
-{
-	//No per frame update needed
-}
-
 void close()
 {
 	//Destroy window	
@@ -128,71 +202,4 @@ void resize()
 	glViewport(0, 0, w, h);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-}
-
-int main(int argc, char* args[])
-{
-	//Start up SDL and create window
-	if (!init())
-	{
-		printf("Failed to initialize!\n");
-	}
-	else
-	{
-		//Main loop flag
-		bool quit = false;
-
-		//Event handler
-		SDL_Event e;
-
-		//Enable text input
-		SDL_StartTextInput();
-
-		//Initialize clear color
-		glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-		glClearColor(0.f, 0.f, 0.f, 1.f);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		// Create shapes program
-		Shapes pen = Shapes();
-
-		//While application is running
-		while (!quit)
-		{
-			//Handle events on queue
-			while (SDL_PollEvent(&e) != 0)
-			{
-				switch (e.type) {
-				case SDL_QUIT:
-					quit = true;
-					break;
-				case SDL_WINDOWEVENT:
-					resize();
-					break;
-				case SDL_KEYDOWN:
-					switch (e.key.keysym.sym) {
-					case SDLK_ESCAPE:
-						quit = true;
-						break;
-					default:
-						break;
-					}
-				}
-			}
-
-			renderShapes(&pen);
-
-			//Update screen
-			SDL_GL_SwapWindow(gWindow);
-		}
-
-		//Disable text input
-		SDL_StopTextInput();
-	}
-
-	//Free resources and close SDL
-	close();
-
-	return 0;
 }
