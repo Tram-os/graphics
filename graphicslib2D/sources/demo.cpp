@@ -1,5 +1,6 @@
 #include "renderer.h"
 #include "shader.h"
+#include "texture.h"
 #include "vertexarray.h"
 
 #include <SDL.h>
@@ -78,6 +79,10 @@ int main(int argc, char* args[])
 		IndexBuffer ib = IndexBuffer(indices, 6);
 		va.AddBuffer(vb, layout);
 
+		Texture texture("resources/textures/dice.png");
+		texture.Bind();
+		//shader.SetUniform1i("u_Texture", 0);
+
 		va.Unbind();
 		vb.Unbind();
 		ib.Unbind();
@@ -109,7 +114,7 @@ int main(int argc, char* args[])
 				}
 			}
 			shader.Bind();
-			shader.SetUniform4f("inputColor", 0.5, 0.5, 0.5, 1);
+			shader.SetUniform4f("inputColor", 0.5, 0.5, 0, 1);
 			renderer.Clear();
 			renderer.Draw(va, ib, shader);
 
