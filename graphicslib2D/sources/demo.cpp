@@ -55,12 +55,13 @@ int main(int argc, char* args[])
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// Create GL stuff:
-		// The four vertices of the rectangle
+		// The four vertices of the rectangle and include the texture coordinates
 		float vertices[] = {
-			-0.5, -0.5,
-			-0.5,  0.5,
-			 0.5,  0.5,
-			 0.5, -0.5
+		//  rectangle  |  texture coords
+			-0.5, -0.5, 0.0, 0.0,
+			-0.5,  0.5, 0.0, 1.0,
+			 0.5,  0.5, 1.0, 1.0,
+			 0.5, -0.5, 1.0, 0.0
 		};
 		unsigned int indices[] = {
 			0, 1, 2, // top left triangle
@@ -76,12 +77,15 @@ int main(int argc, char* args[])
 		VertexBufferLayout layout;
 		layout.Push<float>(2);
 
+		// Push two more floats for the texture
+		layout.Push<float>(2);
+
 		IndexBuffer ib = IndexBuffer(indices, 6);
 		va.AddBuffer(vb, layout);
 
 		Texture texture("resources/textures/dice.png");
 		texture.Bind();
-		//shader.SetUniform1i("u_Texture", 0);
+		shader.SetUniform1i("u_Texture", 0);
 
 		va.Unbind();
 		vb.Unbind();
